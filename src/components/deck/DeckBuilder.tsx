@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { SearchBar } from "./SearchBar";
+import type { SearchResult } from "./SearchBar";
 
 // Define types for our cards
 interface CardData {
@@ -8,6 +11,16 @@ interface CardData {
   name: string;
   column: number;
   location: "main" | "side";
+  image_uris?: {
+    normal: string;
+    small: string;
+  };
+  card_faces?: Array<{
+    image_uris?: {
+      normal: string;
+      small: string;
+    };
+  }>;
 }
 
 interface DeckSectionProps {
@@ -34,18 +47,26 @@ const DeckSection = ({
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    if (e.currentTarget.contains(e.relatedTarget as Node)) {
-      return;
-    }
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
     setIsDraggingOver(false);
+  };
+
+  const getCardImage = (card: CardData) => {
+    if (card.image_uris?.small) {
+      return card.image_uris.small;
+    }
+    if (card.card_faces?.[0]?.image_uris?.small) {
+      return card.card_faces[0].image_uris.small;
+    }
+    return null;
   };
 
   const containerHeight = type === "main" ? 500 : 300;
   const cardHeight = 60;
-  const lastCardHeight = 215; // Full card height for last card
+  const lastCardHeight = cardHeight;
   const cardSpacing = 30;
   const title = type === "main" ? "Main Deck" : "Sideboard";
-  const containerClass = type === "main" ? "w-2/3" : "w-1/3";
+  const containerClass = type === "main" ? "w-2/3 " : "w-1/3 ml-4";
   const scrollContainerId = `${type}-scroll-container`;
   const defaultColumns = type === "main" ? 6 : 3;
 
@@ -61,7 +82,7 @@ const DeckSection = ({
 
   return (
     <div
-      className={`${containerClass} border p-2 bg-gray-50 flex flex-col`}
+      className={`${containerClass} border p-2 bg-gray-50 flex flex-col rounded-lg`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={() => setIsDraggingOver(false)}
@@ -98,10 +119,11 @@ const DeckSection = ({
                 }}
               >
                 <div className="text-xs font-semibold mb-1 text-center sticky top-0 bg-gray-50 z-50 py-1">
-                  {type === "main" ? "Column" : "Side"} {columnIndex + 1}
+                  &nbsp;
                 </div>
                 <div className="relative">
                   {column.map((card, cardIndex) => {
+                    const imageUrl = getCardImage(card);
                     const isLastCard = cardIndex === column.length - 1;
                     const cardTop = cardIndex * cardSpacing;
                     const thisCardHeight = isLastCard
@@ -111,7 +133,7 @@ const DeckSection = ({
                     return (
                       <div
                         key={card.id}
-                        className={`absolute w-full bg-white border border-gray-300 p-1 rounded cursor-move hover:bg-blue-50 transition-transform hover:translate-y-1 cursor-grab ${
+                        className={`absolute w-full h-auto cursor-move hover:bg-blue-50 transition-transform hover:translate-y-1 cursor-grab ${
                           isLastCard ? "z-50" : ""
                         }`}
                         style={{
@@ -125,7 +147,21 @@ const DeckSection = ({
                           onDragStart(card);
                         }}
                       >
-                        <div className="truncate text-sm">{card.name}</div>
+                        <div className="truncate text-sm">
+                          {imageUrl ? (
+                            <Image
+                              src={imageUrl}
+                              alt={card.name}
+                              width={146}
+                              height={204}
+                              className={`w-full h-full object-cover ${
+                                !isLastCard && "opacity-100"
+                              }`}
+                            />
+                          ) : (
+                            card.name
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -173,26 +209,58 @@ const DeckSection = ({
 
 export const DeckBuilder = () => {
   const [draggedCard, setDraggedCard] = useState<CardData | null>(null);
+  // Initialize with 8 empty columns for main deck and 4 for sideboard
   const [mainDeckColumns, setMainDeckColumns] = useState<CardData[][]>(
-    Array.from({ length: 6 }, (_, columnIndex) =>
-      Array.from({ length: 10 }, (_, cardIndex) => ({
-        id: `main-${columnIndex}-${cardIndex}`,
-        name: `Card ${columnIndex}-${cardIndex}`,
-        column: columnIndex,
-        location: "main" as const,
-      }))
-    )
+    Array(8)
+      .fill(null)
+      .map(() => [])
   );
   const [sideboardColumns, setSideboardColumns] = useState<CardData[][]>(
-    Array.from({ length: 3 }, (_, columnIndex) =>
-      Array.from({ length: 5 }, (_, cardIndex) => ({
-        id: `side-${columnIndex}-${cardIndex}`,
-        name: `Side ${columnIndex}-${cardIndex}`,
-        column: columnIndex,
-        location: "side" as const,
-      }))
-    )
+    Array(4)
+      .fill(null)
+      .map(() => [])
   );
+
+  const handleAddToMaindeck = (card: SearchResult) => {
+    const newCard: CardData = {
+      id: `${card.id}-${Date.now()}`, // Make ID unique
+      name: card.name,
+      column: 0,
+      location: "main",
+      image_uris: card.image_uris,
+      card_faces: card.card_faces,
+    };
+
+    setMainDeckColumns((prev) => {
+      // Find first column with space
+      const targetColumnIndex = prev.findIndex((col) => col.length < 10);
+      if (targetColumnIndex === -1) return prev;
+
+      return prev.map((col, idx) =>
+        idx === targetColumnIndex ? [...col, newCard] : col
+      );
+    });
+  };
+
+  const handleAddToSideboard = (card: SearchResult) => {
+    const newCard: CardData = {
+      id: `${card.id}-${Date.now()}`, // Make ID unique
+      name: card.name,
+      column: 0,
+      location: "side",
+      image_uris: card.image_uris,
+      card_faces: card.card_faces,
+    };
+
+    setSideboardColumns((prev) => {
+      const targetColumnIndex = prev.findIndex((col) => col.length < 10);
+      if (targetColumnIndex === -1) return prev;
+
+      return prev.map((col, idx) =>
+        idx === targetColumnIndex ? [...col, newCard] : col
+      );
+    });
+  };
 
   const handleCardMove = (
     card: CardData,
@@ -202,15 +270,11 @@ export const DeckBuilder = () => {
     // Remove from source
     if (card.location === "main") {
       setMainDeckColumns((prev) =>
-        prev.map((col, colIndex) =>
-          colIndex === card.column ? col.filter((c) => c.id !== card.id) : col
-        )
+        prev.map((col) => col.filter((c) => c.id !== card.id))
       );
     } else {
       setSideboardColumns((prev) =>
-        prev.map((col, colIndex) =>
-          colIndex === card.column ? col.filter((c) => c.id !== card.id) : col
-        )
+        prev.map((col) => col.filter((c) => c.id !== card.id))
       );
     }
 
@@ -224,56 +288,42 @@ export const DeckBuilder = () => {
       targetLocation === "main" ? setMainDeckColumns : setSideboardColumns;
 
     setColumns((prev) =>
-      targetColumn >= prev.length
-        ? [...prev, [updatedCard]]
-        : prev.map((col, colIndex) =>
-            colIndex === targetColumn ? [...col, updatedCard] : col
-          )
+      prev.map((col, idx) =>
+        idx === targetColumn ? [...col, updatedCard] : col
+      )
     );
-
-    // Scroll if new column
-    if (
-      targetColumn >=
-      (targetLocation === "main" ? mainDeckColumns : sideboardColumns).length
-    ) {
-      setTimeout(() => {
-        const container = document.getElementById(
-          `${targetLocation}-scroll-container`
-        );
-        container?.scrollTo({
-          left: container.scrollWidth,
-          behavior: "smooth",
-        });
-      }, 100);
-    }
   };
 
   return (
-    <div className="w-full bg-white min-h-[600px] p-4 border border-gray-300 rounded-lg">
-      <div className="flex h-full">
+    <div className="flex flex-col gap-4 p-4">
+      <div className="mb-2">
+        <h1 className="text-2xl font-bold">MTG Deck Builder</h1>
+        <p className="text-sm text-gray-600">
+          Build and manage your Magic: The Gathering decks
+        </p>
+      </div>
+      <SearchBar
+        onAddToMaindeck={handleAddToMaindeck}
+        onAddToSideboard={handleAddToSideboard}
+      />
+      <div className="w-full flex">
         <DeckSection
           type="main"
           columns={mainDeckColumns}
+          onColumnDrop={(targetColumn) => {
+            if (draggedCard) handleCardMove(draggedCard, "main", targetColumn);
+          }}
+          onCreateColumn={() => {}}
           onDragStart={setDraggedCard}
-          onColumnDrop={(targetColumn) =>
-            draggedCard && handleCardMove(draggedCard, "main", targetColumn)
-          }
-          onCreateColumn={() =>
-            draggedCard &&
-            handleCardMove(draggedCard, "main", mainDeckColumns.length)
-          }
         />
         <DeckSection
           type="side"
           columns={sideboardColumns}
+          onColumnDrop={(targetColumn) => {
+            if (draggedCard) handleCardMove(draggedCard, "side", targetColumn);
+          }}
+          onCreateColumn={() => {}}
           onDragStart={setDraggedCard}
-          onColumnDrop={(targetColumn) =>
-            draggedCard && handleCardMove(draggedCard, "side", targetColumn)
-          }
-          onCreateColumn={() =>
-            draggedCard &&
-            handleCardMove(draggedCard, "side", sideboardColumns.length)
-          }
         />
       </div>
     </div>

@@ -1,87 +1,65 @@
 "use client";
 
-import { Card as CardType } from "@/types/mtg";
 import { useState } from "react";
 
+interface CardData {
+  id: string;
+  name: string;
+  image_uris?: {
+    normal: string;
+    small: string;
+  };
+  card_faces?: Array<{
+    image_uris?: {
+      normal: string;
+      small: string;
+    };
+  }>;
+  type_line?: string;
+  set_name?: string;
+  collector_number?: string;
+  rarity?: string;
+}
+
 interface CardProps {
-  card: CardType;
+  card: CardData;
+  onAddToMaindeck?: () => void;
+  onAddToSideboard?: () => void;
   quantity?: number;
   onRemove?: () => void;
   draggable?: boolean;
-  size?: "small" | "medium" | "large";
+  showDetails?: boolean;
 }
 
 export const Card = ({
   card,
-  quantity = 1,
+  onAddToMaindeck,
+  onAddToSideboard,
+  quantity,
   onRemove,
-  draggable = true,
-  size = "small",
+  draggable = false,
+  showDetails = true,
 }: CardProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Handle drag start to enable drag and drop functionality
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     if (!draggable) return;
     e.dataTransfer.setData("application/json", JSON.stringify(card));
     e.dataTransfer.effectAllowed = "copy";
   };
 
-  // Determine image URL based on card data
   const imageUrl =
     card.image_uris?.small ||
     (card.card_faces && card.card_faces[0]?.image_uris?.small) ||
-    "https://c2.scryfall.com/file/scryfall-cards/small/front/0/c/0c082aa8-bf7f-47f2-baf8-43ad253fd7d7.jpg?1562826021"; // Placeholder image
-
-  // Calculate size dimensions
-  const sizeMap = {
-    small: {
-      width: "w-[146px]",
-      height: "h-[204px]",
-      fontSize: "text-xs",
-      quantitySize: "text-xs",
-      removeButtonSize: "w-5 h-5 text-xs",
-      cornerRadius: "rounded",
-    },
-    medium: {
-      width: "w-[200px]",
-      height: "h-[280px]",
-      fontSize: "text-sm",
-      quantitySize: "text-sm",
-      removeButtonSize: "w-6 h-6 text-sm",
-      cornerRadius: "rounded-md",
-    },
-    large: {
-      width: "w-[280px]",
-      height: "h-[392px]",
-      fontSize: "text-base",
-      quantitySize: "text-base",
-      removeButtonSize: "w-7 h-7 text-base",
-      cornerRadius: "rounded-lg",
-    },
-  };
-
-  const {
-    width,
-    height,
-    fontSize,
-    quantitySize,
-    removeButtonSize,
-    cornerRadius,
-  } = sizeMap[size];
+    "https://c2.scryfall.com/file/scryfall-cards/small/front/0/c/0c082aa8-bf7f-47f2-baf8-43ad253fd7d7.jpg?1562826021";
 
   return (
     <div
-      className={`relative ${width} ${height} group ${
-        draggable ? "cursor-move" : ""
-      }`}
+      className="relative w-[146px] h-[204px] group"
       draggable={draggable}
       onDragStart={handleDragStart}
     >
-      {/* Card image */}
-      <div
-        className={`relative ${width} ${height} bg-gray-200 overflow-hidden ${cornerRadius}`}
-      >
+      <div className="relative w-full h-full bg-gray-200 overflow-hidden rounded">
         <img
           src={imageUrl}
           alt={card.name}
@@ -92,25 +70,62 @@ export const Card = ({
           loading="lazy"
         />
 
-        {/* Loading state */}
         {!isLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-            <div className="animate-pulse w-10 h-10 bg-gray-300 rounded-full"></div>
+            <div className="animate-pulse w-10 h-10 bg-gray-300 rounded-full" />
           </div>
         )}
 
-        {/* Card name overlay on hover */}
-        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white px-2 py-1 transform translate-y-full group-hover:translate-y-0 transition-transform">
-          <p className={`truncate ${fontSize}`}>{card.name}</p>
-          <p className={`truncate ${fontSize} text-gray-300`}>
-            {card.type_line}
-          </p>
-        </div>
+        {showDetails && (
+          <>
+            {/* Card name and type */}
+            <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white px-2 py-1 transform translate-y-full group-hover:translate-y-0 transition-transform">
+              <p className="truncate text-xs">{card.name}</p>
+              {card.type_line && (
+                <p className="truncate text-xs text-gray-300">
+                  {card.type_line}
+                </p>
+              )}
+            </div>
 
-        {/* Quantity indicator */}
-        {quantity > 0 && (
+            {/* Add to deck buttons */}
+            {(onAddToMaindeck || onAddToSideboard) && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-center gap-1">
+                {onAddToMaindeck && (
+                  <button
+                    onClick={onAddToMaindeck}
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-xs py-1 px-2 rounded"
+                  >
+                    Main
+                  </button>
+                )}
+                {onAddToSideboard && (
+                  <button
+                    onClick={onAddToSideboard}
+                    className="flex-1 bg-purple-500 hover:bg-purple-600 text-xs py-1 px-2 rounded"
+                  >
+                    Side
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Set info */}
+            {card.set_name && (
+              <div className="absolute bottom-[32px] left-0 right-0 bg-black/75 text-white text-xs p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {card.set_name} #{card.collector_number}
+                <br />
+                {card.rarity &&
+                  card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1)}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Quantity badge */}
+        {quantity && (
           <div className="absolute top-1 left-1 bg-black/70 text-white px-1.5 py-0.5 rounded-full">
-            <span className={quantitySize}>{quantity}×</span>
+            <span className="text-xs">{quantity}×</span>
           </div>
         )}
 
@@ -118,17 +133,12 @@ export const Card = ({
         {onRemove && (
           <button
             onClick={onRemove}
-            className={`absolute top-1 right-1 bg-red-500 text-white ${removeButtonSize} rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity`}
+            className="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 text-xs rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
             title="Remove card"
           >
             ×
           </button>
         )}
-
-        {/* Hover effect */}
-        <div
-          className={`absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/10 transition-colors ${cornerRadius}`}
-        />
       </div>
     </div>
   );
