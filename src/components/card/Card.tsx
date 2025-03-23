@@ -59,7 +59,7 @@ export const Card = ({
       draggable={draggable}
       onDragStart={handleDragStart}
     >
-      <div className="relative w-full h-full bg-gray-200 overflow-hidden rounded">
+      <div className="relative w-full h-full overflow-hidden rounded-md bg-transparent">
         <img
           src={imageUrl}
           alt={card.name}

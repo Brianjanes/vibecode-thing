@@ -32,13 +32,13 @@ export const SearchResults = ({
     : { "": results };
 
   return (
-    <div className="h-[300px] overflow-y-auto border border-gray-200 rounded-md bg-white p-4 mt-4">
+    <div className="h-[300px] overflow-y-auto border border-border rounded-md bg-transparent p-4 mt-4">
       {isLoading ? (
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </div>
       ) : results.length === 0 ? (
-        <div className="flex items-center justify-center h-full text-gray-500">
+        <div className="flex items-center justify-center h-full text-muted-foreground">
           {searchTerm ? "No cards found" : "Start typing to search for cards"}
         </div>
       ) : (
@@ -46,7 +46,7 @@ export const SearchResults = ({
           {Object.entries(groupedResults).map(([name, cards]) => (
             <div key={name} className="space-y-2">
               {showAllVersions && name && (
-                <h3 className="text-sm font-medium text-gray-700">{name}</h3>
+                <h3 className="text-sm font-medium text-foreground">{name}</h3>
               )}
               <div className="flex flex-wrap gap-4">
                 {cards.map((card) => (
