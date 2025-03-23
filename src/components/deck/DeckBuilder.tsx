@@ -82,12 +82,12 @@ const DeckSection = ({
 
   return (
     <div
-      className={`${containerClass} border p-2 bg-gray-50 flex flex-col rounded-lg`}
+      className={`${containerClass} border border-border p-2 bg-background flex flex-col rounded-lg`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={() => setIsDraggingOver(false)}
     >
-      <h2 className="text-lg font-bold mb-2">
+      <h2 className="text-lg font-bold mb-2 text-foreground">
         {title} ({columns.flat().length} cards)
       </h2>
       <div className="min-w-full flex-1 relative">
@@ -118,7 +118,7 @@ const DeckSection = ({
                   setIsDraggingOver(false);
                 }}
               >
-                <div className="text-xs font-semibold mb-1 text-center sticky top-0 bg-gray-50 z-50 py-1">
+                <div className="text-xs font-semibold mb-1 text-center sticky top-0 bg-background z-50 py-1">
                   &nbsp;
                 </div>
                 <div className="relative">
@@ -133,7 +133,7 @@ const DeckSection = ({
                     return (
                       <div
                         key={card.id}
-                        className={`absolute w-full h-auto cursor-move hover:bg-blue-50 transition-transform hover:translate-y-1 cursor-grab ${
+                        className={`absolute w-full h-auto cursor-move hover:bg-accent transition-transform hover:translate-y-1 cursor-grab ${
                           isLastCard ? "z-50" : ""
                         }`}
                         style={{
@@ -147,7 +147,7 @@ const DeckSection = ({
                           onDragStart(card);
                         }}
                       >
-                        <div className="truncate text-sm">
+                        <div className="truncate text-sm text-foreground">
                           {imageUrl ? (
                             <Image
                               src={imageUrl}
@@ -190,13 +190,13 @@ const DeckSection = ({
               setIsDraggingOver(false);
             }}
           >
-            <div className="text-xs font-semibold mb-1 text-center sticky top-0 bg-gray-50 z-50 py-1">
+            <div className="text-xs font-semibold mb-1 text-center sticky top-0 bg-background z-50 py-1">
               New Column
             </div>
             <div
-              className={`h-[${containerHeight}px] border-2 border-dashed border-blue-300 rounded-md bg-blue-50 flex items-center justify-center`}
+              className={`h-[${containerHeight}px] border-2 border-dashed border-primary rounded-md bg-accent/50 flex items-center justify-center`}
             >
-              <p className="text-blue-500 text-sm">
+              <p className="text-primary text-sm">
                 Drop here to create new column
               </p>
             </div>
@@ -297,8 +297,8 @@ export const DeckBuilder = () => {
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold">MTG Deck Builder</h1>
-        <p className="text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-foreground">MTG Deck Builder</h1>
+        <p className="text-sm text-muted-foreground">
           Build and manage your Magic: The Gathering decks
         </p>
       </div>
