@@ -32,13 +32,17 @@ const MOCK_DECKS: Deck[] = [
   },
 ];
 
+export const metadata = {
+  title: "Dashboard",
+  description: "Welcome to your MTG Deck Builder dashboard",
+};
+
 export default async function DashboardPage() {
   await auth(); // Just check if user is authenticated
 
   return (
-    <div className="space-y-6 mx-6 mx-auto">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-6">
         <a
           href="/deck-builder"
           className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -60,7 +64,7 @@ export default async function DashboardPage() {
         </a>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {MOCK_DECKS.map((deck) => (
           <div
             key={deck.id}

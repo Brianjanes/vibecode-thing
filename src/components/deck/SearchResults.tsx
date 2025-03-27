@@ -32,7 +32,7 @@ export const SearchResults = ({
     : { "": results };
 
   return (
-    <div className="h-[300px] overflow-y-auto border border-border rounded-md bg-transparent p-4 mt-4">
+    <div className="w-full h-[300px] overflow-y-auto glass-effect glass-border rounded-md">
       {isLoading ? (
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -42,20 +42,26 @@ export const SearchResults = ({
           {searchTerm ? "No cards found" : "Start typing to search for cards"}
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="p-2">
           {Object.entries(groupedResults).map(([name, cards]) => (
-            <div key={name} className="space-y-2">
+            <div key={name} className="mb-4 last:mb-0">
               {showAllVersions && name && (
-                <h3 className="text-sm font-medium text-foreground">{name}</h3>
+                <h3 className="text-sm font-medium text-foreground/90 px-2 mb-2">
+                  {name}
+                </h3>
               )}
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-2">
                 {cards.map((card) => (
-                  <Card
+                  <div
                     key={card.id}
-                    card={card}
-                    onAddToMaindeck={() => onAddToMaindeck(card)}
-                    onAddToSideboard={() => onAddToSideboard(card)}
-                  />
+                    className="w-auto  rounded-md glass-effect transition-all duration-200"
+                  >
+                    <Card
+                      card={card}
+                      onAddToMaindeck={() => onAddToMaindeck(card)}
+                      onAddToSideboard={() => onAddToSideboard(card)}
+                    />
+                  </div>
                 ))}
               </div>
             </div>

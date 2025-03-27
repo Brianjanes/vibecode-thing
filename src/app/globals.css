@@ -96,25 +96,57 @@ h6 {
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 240 10% 14%;
+    --background-secondary: 240 10% 17%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 240 10% 17%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 17%;
     --popover-foreground: 0 0% 98%;
     --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 20% 98%;
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 240 10% 19%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --muted: 240 10% 19%;
+    --muted-foreground: 240 5% 75%;
+    --accent: 240 10% 19%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 240 10% 19%;
+    --input: 240 10% 19%;
     --ring: 262.1 83.3% 57.8%;
+    --glow-primary: 262.1 83.3% 57.8%;
+    --card-highlight: 240 100% 99%;
+  }
+
+  /* Add glass-card utility class */
+  .glass-card {
+    @apply bg-background/30 backdrop-blur-md border-[0.5px] border-white/[0.08];
+    background-color: hsl(var(--background) / 0.3);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Add gradient border utilities */
+  .gradient-border {
+    position: relative;
+    background-clip: padding-box;
+    border: 1px solid transparent;
+  }
+
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(
+      185deg,
+      hsl(var(--primary) / 0.3),
+      transparent 40%,
+      transparent 60%,
+      hsl(var(--primary) / 0.2) 100%
+    );
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
   }
 }
 
@@ -129,6 +161,49 @@ h6 {
   }
 }
 
+/* Dark mode background styling */
+.dark body {
+  background: radial-gradient(
+      circle at 50% 0%,
+      hsl(240 15% 25% / 0.8) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 0% 0%,
+      hsl(262 83% 58% / 0.15) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 100% 0%,
+      hsl(240 100% 70% / 0.15) 0%,
+      transparent 40%
+    ),
+    linear-gradient(to bottom, hsl(240 10% 14%), hsl(240 10% 12%)),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 24px 24px,
+    24px 24px;
+  background-position: center, center, center, center, center, center;
+}
+
+/* Add subtle noise texture */
+.dark body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)' opacity='0.015'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+/* Ensure main content is above the noise texture */
+#__next {
+  position: relative;
+  z-index: 2;
+}
+
 /* Base styles for better defaults */
 @layer utilities {
   .min-h-screen {
@@ -136,4 +211,93 @@ h6 {
     /* mobile viewport bug fix */
     min-height: -webkit-fill-available;
   }
+}
+
+/* Update card and border styling for dark mode */
+.dark .glass-card {
+  background-color: hsl(var(--background) / 0.3);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 4px 0 rgba(0, 0, 0, 0.2),
+    0 0 24px -8px hsl(var(--glow-primary) / 0.2);
+}
+
+.dark .glass-card:hover {
+  background-color: hsl(var(--background) / 0.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 8px rgba(0, 0, 0, 0.2),
+    0 0 24px -8px hsl(var(--glow-primary) / 0.3);
+}
+
+/* Add highlight effect for cards */
+.dark .glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    185deg,
+    hsl(var(--card-highlight) / 0.1),
+    transparent 40%
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@layer components {
+  .glass-effect {
+    @apply backdrop-blur-md border-[0.5px] border-white/[0.08] relative;
+    background: linear-gradient(
+      to bottom right,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.01)
+    );
+  }
+}
+
+@layer utilities {
+  .glass-border {
+    position: relative;
+  }
+
+  .glass-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      185deg,
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.03)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* Then update the dark mode styles */
+.dark .glass-effect {
+  @apply bg-black/10;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.dark .glass-effect:hover {
+  @apply bg-black/20;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Optional glow effect for primary elements */
+.dark .glass-effect.with-glow {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 4px 0 rgba(0, 0, 0, 0.2),
+    0 0 24px -8px hsl(var(--primary) / 0.2);
+}
+
+.dark .glass-effect.with-glow:hover {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 8px rgba(0, 0, 0, 0.2),
+    0 0 32px -8px hsl(var(--primary) / 0.3);
 }
