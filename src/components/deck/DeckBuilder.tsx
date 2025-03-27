@@ -66,7 +66,7 @@ const DeckSection = ({
   const lastCardHeight = cardHeight;
   const cardSpacing = 30;
   const title = type === "main" ? "Main Deck" : "Sideboard";
-  const containerClass = type === "main" ? "w-2/3 " : "w-1/3 ml-4";
+  const containerClass = type === "main" ? "w-full" : "w-full";
   const scrollContainerId = `${type}-scroll-container`;
   const defaultColumns = type === "main" ? 6 : 3;
 
@@ -82,12 +82,12 @@ const DeckSection = ({
 
   return (
     <div
-      className={`${containerClass} border border-border p-2 bg-background flex flex-col rounded-lg`}
+      className={`${containerClass} border border-border p-4 bg-background rounded-lg`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={() => setIsDraggingOver(false)}
     >
-      <h2 className="text-lg font-bold mb-2 text-foreground">
+      <h2 className="text-lg font-bold mb-4 text-foreground">
         {title} ({columns.flat().length} cards)
       </h2>
       <div className="min-w-full flex-1 relative">
@@ -295,36 +295,36 @@ export const DeckBuilder = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <div className="mb-2">
-        <h1 className="text-2xl font-bold text-foreground">MTG Deck Builder</h1>
-        <p className="text-sm text-muted-foreground">
-          Build and manage your Magic: The Gathering decks
-        </p>
-      </div>
+    <div className="flex flex-col gap-6">
       <SearchBar
         onAddToMaindeck={handleAddToMaindeck}
         onAddToSideboard={handleAddToSideboard}
       />
-      <div className="w-full flex">
-        <DeckSection
-          type="main"
-          columns={mainDeckColumns}
-          onColumnDrop={(targetColumn) => {
-            if (draggedCard) handleCardMove(draggedCard, "main", targetColumn);
-          }}
-          onCreateColumn={() => {}}
-          onDragStart={setDraggedCard}
-        />
-        <DeckSection
-          type="side"
-          columns={sideboardColumns}
-          onColumnDrop={(targetColumn) => {
-            if (draggedCard) handleCardMove(draggedCard, "side", targetColumn);
-          }}
-          onCreateColumn={() => {}}
-          onDragStart={setDraggedCard}
-        />
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-[2] min-w-0">
+          <DeckSection
+            type="main"
+            columns={mainDeckColumns}
+            onColumnDrop={(targetColumn) => {
+              if (draggedCard)
+                handleCardMove(draggedCard, "main", targetColumn);
+            }}
+            onCreateColumn={() => {}}
+            onDragStart={setDraggedCard}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <DeckSection
+            type="side"
+            columns={sideboardColumns}
+            onColumnDrop={(targetColumn) => {
+              if (draggedCard)
+                handleCardMove(draggedCard, "side", targetColumn);
+            }}
+            onCreateColumn={() => {}}
+            onDragStart={setDraggedCard}
+          />
+        </div>
       </div>
     </div>
   );
